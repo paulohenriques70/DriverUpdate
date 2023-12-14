@@ -58,6 +58,7 @@ namespace DriverUpdate_1
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.Advanced;
 
@@ -76,7 +77,7 @@ namespace DriverUpdate_1
         private const int DELAY_STOP_BATCH = 5000;
 
         // delay between 2 starting batches
-        private const int DELAY_START_BATCH = 10000;
+        private const int DELAY_START_BATCH = 5000;
 
         // timeout for a stoping batch
         private const int TIMEOUT_STOP = 60000;
@@ -152,14 +153,16 @@ namespace DriverUpdate_1
 
         private void StartElements(Element[] elements, int batchSize)
         {
-            int size = elements.Count();
-            int number = 1;
-            for (int i = 0; i < size; i += batchSize, number++)
+            int totalBatches = (int)(elements.Count() / batchSize) + 1;
+
+            int number = 0;
+            foreach (var batch in elements.Batch(batchSize))
             {
-                engine.GenerateInformation("Proceesing start batch #" + number + " out of " + ((int)(size / batchSize) + 1));
-                StartElements(elements.Skip(i).Take(batchSize).ToArray());
+                engine.GenerateInformation("Proceesing start batch #" + ++number + " out of " + totalBatches);
+                StartElements(batch.ToArray());
                 Thread.Sleep(DELAY_START_BATCH);
             }
+
         }
 
         private void StartElements(Element[] elements)
@@ -184,14 +187,16 @@ namespace DriverUpdate_1
 
         private void StopElements(Element[] elements, int batchSize)
         {
-            int size = elements.Count();
-            int number = 1;
-            for (int i = 0; i < size; i += batchSize, number++)
+            int totalBatches = (int)(elements.Count() / batchSize) + 1;
+
+            int number = 0;
+            foreach (var batch in elements.Batch(batchSize))
             {
-                engine.GenerateInformation("Proceesing stop batch #" + number + " out of " + ((int)(size / batchSize) + 1));
-                StopElements(elements.Skip(i).Take(batchSize).ToArray());
+                engine.GenerateInformation("Proceesing stop batch #" + ++number + " out of " + totalBatches);
+                StopElements(batch.ToArray());
                 Thread.Sleep(DELAY_STOP_BATCH);
             }
+
         }
 
         private void StopElements(Element[] elements)
