@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>DriverUpdate</Name>
+	<Description></Description>
+	<Type>Automation</Type>
+	<Author>SKYLINE2\PHE</Author>
+	<CheckSets>FALSE</CheckSets>
+	<Folder></Folder>
+
+	<Protocols>
+	</Protocols>
+
+	<Memory>
+	</Memory>
+
+	<Parameters>
+		<ScriptParameter id="10" type="string" values="">
+			<Description>Driver name</Description>
+		</ScriptParameter>
+		<ScriptParameter id="11" type="string" values="">
+			<Description>Driver version</Description>
+		</ScriptParameter>
+		<ScriptParameter id="12" type="string" values="">
+			<Description>Batch size</Description>
+		</ScriptParameter>
+
+	</Parameters>
+
+	<Script>
+		<Exe id="1" type="csharp">
+			<Value><![CDATA[[Project:DriverUpdate_1]]]></Value>
+			<!--<Param type="debug">true</Param>-->
+			<Message></Message>
+		</Exe>
+	</Script>
+</DMSScript>
