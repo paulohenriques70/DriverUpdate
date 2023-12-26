@@ -53,6 +53,7 @@ namespace DriverUpdate_1
 {
     using System;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using Skyline.DataMiner.Automation;
@@ -68,10 +69,10 @@ namespace DriverUpdate_1
     public class Script
     {
         // delay between stopping 2 elements
-        private const int DELAY_STOP = 500;
+        private const int DELAY_STOP = 100;
 
         // delay between starting 2 elements
-        private const int DELAY_START = 500;
+        private const int DELAY_START = 100;
 
         // delay betwwen 2 stopping batches
         private const int DELAY_STOP_BATCH = 5000;
@@ -88,6 +89,8 @@ namespace DriverUpdate_1
         // delay between checking retries
         private const int WAIT_BEFORE_GET_STATE = 5000;
 
+        private readonly Log log = Log.OpenLog();
+
         private IEngine engine;
         private IDms dms;
 
@@ -100,7 +103,7 @@ namespace DriverUpdate_1
             this.engine = engine;
             dms = engine.GetDms();
 
-            engine.Timeout = TimeSpan.FromHours(2);
+            engine.Timeout = TimeSpan.FromHours(4);
 
             // script input arguments
             string driverName = engine.GetScriptParam("Driver name").Value.Trim();
@@ -111,10 +114,14 @@ namespace DriverUpdate_1
             engine.GenerateInformation("Driver Version: " + driverVersion);
             engine.GenerateInformation("Batch Size: " + batchSize);
 
+            log.WriteLine(Log.Level.INFO, "Driver name: " + driverName);
+            log.WriteLine(Log.Level.INFO, "Driver Version: " + driverVersion);
+            log.WriteLine(Log.Level.INFO, "Batch Size: " + batchSize);
+
             if (CheckInputParameters(driverName, driverVersion))
             {
                 Element[] elements = engine.FindElementsByProtocol(driverName, "Production").Where(x => x.IsActive).ToArray();
-                engine.GenerateInformation("Number of active elements running Production version: " + elements.Count());
+                log.WriteLine(Log.Level.INFO, "Number of active elements running Production version: " + elements.Count());
 
                 StopElements(elements, batchSize);
 
@@ -127,6 +134,7 @@ namespace DriverUpdate_1
                 StartElements(elements, batchSize);
             }
 
+            log.WriteLine(Log.Level.INFO, "Finished.");
         }
 
         private bool CheckInputParameters(string driverName, string driverVersion)
@@ -136,15 +144,19 @@ namespace DriverUpdate_1
                 IDmsProtocol newProtocol = dms.GetProtocol(driverName, driverVersion);
                 IDmsProtocol prodProtocol = dms.GetProtocol(driverName, "Production");
                 engine.GenerateInformation("Current Production version: " + prodProtocol.ReferencedVersion);
+                log.WriteLine(Log.Level.INFO, "Current Production version: " + prodProtocol.ReferencedVersion);
+
                 if (driverVersion.ToLower() == prodProtocol.ReferencedVersion.ToLower())
                 {
-                    engine.GenerateInformation("ERR: Version " + driverVersion + " is already in Production. Aborting");
+                    engine.GenerateInformation("ERR: Version " + driverVersion + " is already in Production. Aborting.");
+                    log.WriteLine(Log.Level.ERROR, "Version " + driverVersion + " is already in Production. Aborting.");
                     return false;
                 }
             }
             catch (Exception ex)
             {
                 engine.GenerateInformation("ERR: " + ex.Message + ". Aborting.");
+                log.WriteLine(Log.Level.ERROR, ex.Message + ". Aborting.");
                 return false;
             }
 
@@ -158,11 +170,10 @@ namespace DriverUpdate_1
             int number = 0;
             foreach (var batch in elements.Batch(batchSize))
             {
-                engine.GenerateInformation("Proceesing start batch #" + ++number + " out of " + totalBatches);
+                log.WriteLine(Log.Level.INFO, "Proceesing start batch #" + ++number + " out of " + totalBatches);
                 StartElements(batch.ToArray());
                 Thread.Sleep(DELAY_START_BATCH);
             }
-
         }
 
         private void StartElements(Element[] elements)
@@ -170,18 +181,18 @@ namespace DriverUpdate_1
             foreach (Element el in elements)
             {
                 el.Start();
-                engine.GenerateInformation("Element started: " + el.ElementName + " - " + el.ProtocolName + " - " + el.ProtocolVersion);
+                log.WriteLine(Log.Level.INFO, "Element started: " + el.ElementName + " - " + el.ProtocolName + " - " + el.ProtocolVersion);
 
                 Thread.Sleep(DELAY_START);
             }
 
             if (Retry(elements, IsAllStarted, TIMEOUT_START))
             {
-                engine.GenerateInformation("All elements in batch were started");
+                log.WriteLine(Log.Level.INFO, "All elements in batch were started");
             }
             else
             {
-                engine.GenerateInformation("ERR: Failed to start some elements");
+                log.WriteLine(Log.Level.ERROR, "Failed to start some elements");
             }
         }
 
@@ -192,11 +203,10 @@ namespace DriverUpdate_1
             int number = 0;
             foreach (var batch in elements.Batch(batchSize))
             {
-                engine.GenerateInformation("Proceesing stop batch #" + ++number + " out of " + totalBatches);
+                log.WriteLine(Log.Level.INFO, "Proceesing stop batch #" + ++number + " out of " + totalBatches);
                 StopElements(batch.ToArray());
                 Thread.Sleep(DELAY_STOP_BATCH);
             }
-
         }
 
         private void StopElements(Element[] elements)
@@ -204,18 +214,18 @@ namespace DriverUpdate_1
             foreach (Element el in elements)
             {
                 el.Stop();
-                engine.GenerateInformation("Element stopped: " + el.ElementName + " - " + el.ProtocolName + " - " + el.ProtocolVersion);
+                log.WriteLine(Log.Level.INFO, "Element stopped: " + el.ElementName + " - " + el.ProtocolName + " - " + el.ProtocolVersion);
 
                 Thread.Sleep(DELAY_STOP);
             }
 
             if (Retry(elements, IsAllStopped, TIMEOUT_STOP))
             {
-                engine.GenerateInformation("All elements in batch were stopped");
+                log.WriteLine(Log.Level.INFO, "All elements in batch were stopped");
             }
             else
             {
-                engine.GenerateInformation("ERR: Failed to stop some elements");
+                log.WriteLine(Log.Level.ERROR, "Failed to stop some elements");
             }
         }
 
@@ -254,7 +264,7 @@ namespace DriverUpdate_1
                 success = allReady(elemns);
                 if (!success)
                 {
-                    engine.GenerateInformation("Waiting for all elements to stop/start ...");
+                    log.WriteLine(Log.Level.INFO, "Waiting for all elements to stop/start ...");
                     Thread.Sleep(WAIT_BEFORE_GET_STATE);
                 }
             }
@@ -265,7 +275,7 @@ namespace DriverUpdate_1
 
         private void SetProductionVersion(string driverName, string driverVersion)
         {
-            engine.GenerateInformation("Setting " + driverName + "_" + driverVersion + " as Production.");
+            log.WriteLine(Log.Level.INFO, "Setting " + driverName + "_" + driverVersion + " as Production.");
 
             DMSMessage msg = new SetDataMinerInfoMessage
             {
@@ -282,6 +292,61 @@ namespace DriverUpdate_1
             };
 
             engine.SendSLNetMessage(msg);
+        }
+    }
+
+    public class Log
+    {
+        private readonly StreamWriter file;
+
+        public Log(string logFileName)
+        {
+            file = new StreamWriter(logFileName, false)
+            {
+                AutoFlush = true,
+            };
+        }
+
+        public enum Level
+        {
+            DEBUG,
+            CHANGE,
+            INFO,
+            ERROR,
+            WARN,
+        }
+
+        public static Log OpenLog()
+        {
+            string path = @"C:\Skyline_Data\DriverUpdate_Log";
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            string logFileName = path + @"\\driverupdate_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss") + ".txt";
+            return new Log(logFileName);
+        }
+
+        public void Close()
+        {
+            file.Close();
+        }
+
+        public Log WriteLine(Level level, String line)
+        {
+            string timeStamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ff");
+
+            file.WriteLine(string.Format("{0}|{1}|{2}", timeStamp, level, line));
+
+            return this;
+        }
+
+        public Log WriteLine()
+        {
+            file.WriteLine();
+            return this;
         }
     }
 }
