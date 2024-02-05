@@ -240,15 +240,45 @@ namespace DriverUpdate_1
             return true;
         }
 
+        private bool IsElementFullyStopped(Element elem)
+        {
+
+            // ! IsElementActiveInSLDms
+            // ! IsElementLoadedInSLNet
+            // ! IsElementLoadedInSLElement
+
+            return true;
+        }
+
         private bool IsAllStarted(Element[] elems)
         {
             foreach (Element el in elems)
             {
-                if (!dms.GetElement(el.ElementName).IsStartupComplete())
+                if (!dms.GetElement(el.ElementName).IsStartupComplete() || !IsElementLoadedInSLNet(el))
                     return false;
             }
 
             return true;
+        }
+
+        private bool IsElementLoadedInSLNet(Element elem)
+        {
+            DMSMessage msg = new GetElementProtocolMessage
+            {
+                DataMinerID = elem.DmaId,
+                ElementID = elem.ElementId,
+                ReturnOverrideInfoOnly = false,
+            };
+
+            DMSMessage[] resp = engine.SendSLNetMessage(msg);
+
+            if (resp != null)
+            {
+                foreach (GetElementProtocolResponseMessage prot in resp)
+                    return !prot.WasBuiltWithUnsafeData;
+            }
+
+            return false;
         }
 
         // Retry until success or until timeout
