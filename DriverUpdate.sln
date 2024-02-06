@@ -46,6 +46,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{DDE1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DriverUpdate_1", "DriverUpdate_1\DriverUpdate_1.csproj", "{84793E4D-4DA4-49EB-9630-464BB46146C1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ElementStartAndStop", "ElementStartAndStop", "{C48B6063-68F9-4DAA-98E1-A9A7844256CD}"
+	ProjectSection(SolutionItems) = preProject
+		ElementStartAndStop.xml = ElementStartAndStop.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{1D8D8256-6277-413F-BC85-2C08C07CBE5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElementStartAndStop_1", "ElementStartAndStop_1\ElementStartAndStop_1.csproj", "{0A4CAA0C-1CC7-463E-BB2C-0C662980FF23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +65,10 @@ Global
 		{84793E4D-4DA4-49EB-9630-464BB46146C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84793E4D-4DA4-49EB-9630-464BB46146C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84793E4D-4DA4-49EB-9630-464BB46146C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A4CAA0C-1CC7-463E-BB2C-0C662980FF23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A4CAA0C-1CC7-463E-BB2C-0C662980FF23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A4CAA0C-1CC7-463E-BB2C-0C662980FF23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A4CAA0C-1CC7-463E-BB2C-0C662980FF23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +79,9 @@ Global
 		{E0491B1C-7369-4BE7-954A-5B62DD6EBB78} = {15FAF352-0857-43F8-8862-0202A7BC1D91}
 		{DDE18A5B-1FF9-49B5-95C9-5C1A525455A4} = {E0491B1C-7369-4BE7-954A-5B62DD6EBB78}
 		{84793E4D-4DA4-49EB-9630-464BB46146C1} = {DDE18A5B-1FF9-49B5-95C9-5C1A525455A4}
+		{C48B6063-68F9-4DAA-98E1-A9A7844256CD} = {15FAF352-0857-43F8-8862-0202A7BC1D91}
+		{1D8D8256-6277-413F-BC85-2C08C07CBE5C} = {C48B6063-68F9-4DAA-98E1-A9A7844256CD}
+		{0A4CAA0C-1CC7-463E-BB2C-0C662980FF23} = {1D8D8256-6277-413F-BC85-2C08C07CBE5C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF17D312-0250-45A2-A74B-ED52F46C8DBE}
