@@ -92,6 +92,7 @@ namespace DriverUpdate_1
             this.engine = engine;
             dms = engine.GetDms();
 
+            // script timeout: 4 hours
             engine.Timeout = TimeSpan.FromHours(4);
 
             // script input arguments
@@ -278,7 +279,9 @@ namespace DriverUpdate_1
         private const int DELAY_START = 100;
 
         private TimeSpan AddRemoveSubscriptionTimeout = TimeSpan.FromSeconds(30);
-        private readonly int ElementStartStopTimeout = 5*60000;
+
+        private readonly int ElementStartStopTimeout = 10*60000; // 10 minutes. is it enough?
+
         private readonly object _lock = new object();
         private readonly Log log;
 
